@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Q&A - RAG Intelligence</title>
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+:root {
+  --primary:#0ea47a;
+  --primary-dark:#087a5b;
+  --accent:#34d399;
+  --bg-gradient:linear-gradient(135deg,#f0fdf4,#dcfce7,#bbf7d0);
+  --card-bg:#ffffff;
+  --text-dark:#1f2937;
+  --text-light:#6b7280;
+  --border:#e5e7eb;
+  --radius:18px;
+  --shadow-md:0 4px 6px rgba(0,0,0,0.1);
+  --shadow-xl:0 20px 25px rgba(0,0,0,0.1);
+}
+
+* { box-sizing:border-box; margin:0; padding:0; }
+
+body{
+  height:100vh;
+  width:100vw;
+  overflow:hidden;
+  background:var(--bg-gradient);
+  font-family:'Inter',sans-serif;
+  display:flex;
+  align-items:stretch;
+  justify-content:center;
+  padding:0;
+  margin:0;
+}
+
+.app-container{
+  width:100%;
+  max-width:100%;
+  height:100vh;
+  background:var(--card-bg);
+  display:grid;
+  grid-template-columns:340px 1fr;
+  border-radius:0;
+  box-shadow:none;
+  overflow:hidden;
+}
+
+/* ---------------- SIDEBAR ---------------- */
+.sidebar{
+  background:linear-gradient(180deg,#059669,#047857,#065f46);
+  padding:28px 20px;
+  color:#fff;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+  box-shadow:4px 0 12px rgba(0,0,0,0.1);
+  transition:transform 0.3s ease;
+  z-index:100;
+}
+
+.hamburger-btn{
+  display:none;
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-light);
+  padding:9px 18px;
+  border-radius:10px;
+  font-size:13px;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-weight:500;
+  font-family:'Inter',sans-serif;
+  align-items:center;
+  gap:6px;
+}
+
+.hamburger-btn:hover{
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+  transform:translateY(-1px);
+  box-shadow:0 4px 8px rgba(14,164,122,0.2);
+}
+
+.sidebar-overlay{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  background:rgba(0,0,0,0.5);
+  z-index:99;
+}
+
+.sidebar-overlay.active{
+  display:block;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:24px;
+  font-weight:800;
+  letter-spacing:-0.5px;
+  padding-bottom:16px;
+  border-bottom:1px solid rgba(255,255,255,0.2);
+}
+
+.brand i{
+  font-size:28px;
+}
+
+.upload-section{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+}
+
+.upload-card{
+  background:rgba(255,255,255,0.12);
+  border:2px dashed rgba(255,255,255,0.35);
+  border-radius:16px;
+  padding:28px 20px;
+  text-align:center;
+  cursor:pointer;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  position:relative;
+  overflow:hidden;
+}
+
+.upload-card:hover{
+  background:rgba(255,255,255,0.18);
+  border-color:rgba(255,255,255,0.5);
+  transform:translateY(-2px);
+}
+
+.upload-card input{
+  display:none;
+}
+
+.upload-icon{
+  font-size:42px;
+  margin-bottom:12px;
+  opacity:0.9;
+}
+
+.upload-text{
+  font-size:15px;
+  font-weight:600;
+  opacity:0.95;
+  line-height:1.6;
+}
+
+.upload-hint{
+  font-size:12px;
+  opacity:0.7;
+  margin-top:8px;
+}
+
+.file-info{
+  background:rgba(255,255,255,0.15);
+  border-radius:12px;
+  padding:16px;
+  font-size:13px;
+  display:none;
+  position:relative;
+}
+
+.file-info.active{
+  display:block;
+  animation:fadeIn 0.3s ease;
+}
+
+.file-delete-btn{
+  position:absolute;
+  top:8px;
+  right:8px;
+  background:rgba(239,68,68,0.8);
+  border:none;
+  color:white;
+  width:24px;
+  height:24px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+}
+
+.file-delete-btn:hover{
+  background:rgba(220,38,38,1);
+  transform:scale(1.1);
+}
+
+.file-name{
+  font-weight:600;
+  margin-bottom:8px;
+  word-break:break-word;
+  padding-right:28px;
+}
+
+.file-status{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  opacity:0.9;
+}
+
+.status-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:#34d399;
+  animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+  0%,100%{opacity:1;}
+  50%{opacity:0.5;}
+}
+
+.chat-history-section{
+  flex:1;
+  overflow-y:auto;
+  margin-bottom:16px;
+}
+
+.chat-history-title{
+  font-size:13px;
+  font-weight:600;
+  opacity:0.8;
+  margin-bottom:12px;
+  padding:0 4px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+}
+
+.chat-sessions{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.chat-session-item{
+  background:rgba(255,255,255,0.1);
+  border-radius:10px;
+  padding:12px 14px;
+  cursor:pointer;
+  transition:all 0.2s;
+  border:1px solid transparent;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:8px;
+}
+
+.chat-session-item:hover{
+  background:rgba(255,255,255,0.18);
+  transform:translateX(4px);
+}
+
+.chat-session-item.active{
+  background:rgba(255,255,255,0.25);
+  border-color:rgba(255,255,255,0.4);
+}
+
+.chat-session-name{
+  font-size:13px;
+  font-weight:500;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  flex:1;
+}
+
+.chat-session-delete{
+  opacity:0;
+  background:rgba(255,255,255,0.2);
+  border:none;
+  color:white;
+  width:24px;
+  height:24px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+}
+
+.chat-session-item:hover .chat-session-delete{
+  opacity:1;
+}
+
+.chat-session-delete:hover{
+  background:rgba(239,68,68,0.8);
+}
+
+.chat-history-section::-webkit-scrollbar{
+  width:6px;
+}
+
+.chat-history-section::-webkit-scrollbar-track{
+  background:transparent;
+}
+
+.chat-history-section::-webkit-scrollbar-thumb{
+  background:rgba(255,255,255,0.3);
+  border-radius:3px;
+}
+
+.stats-card{
+  background:rgba(255,255,255,0.1);
+  border-radius:12px;
+  padding:16px;
+}
+
+.stat-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 0;
+  font-size:13px;
+  border-bottom:1px solid rgba(255,255,255,0.1);
+}
+
+.stat-item:last-child{
+  border-bottom:none;
+}
+
+.stat-label{
+  opacity:0.8;
+}
+
+.stat-value{
+  font-weight:700;
+  font-size:14px;
+}
+
+/* ---------------- CHAT AREA ---------------- */
+.chat-area{
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+  height:100vh;
+  max-height:100vh;
+  overflow:hidden;
+  background:linear-gradient(to bottom,#fafafa,#ffffff);
+}
+
+.chat-header{
+  padding:22px 32px;
+  border-bottom:1px solid var(--border);
+  background:rgba(255,255,255,0.95);
+  backdrop-filter:blur(10px);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-shrink:0;
+}
+
+.header-title{
+  font-weight:700;
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  color:var(--text-dark);
+  flex-shrink:1;
+  min-width:0;
+}
+
+.header-actions{
+  display:flex;
+  gap:12px;
+}
+
+.action-btn{
+  background:transparent;
+  border:1px solid var(--border);
+  color:var(--text-light);
+  padding:9px 18px;
+  border-radius:10px;
+  font-size:20px;
+  cursor:pointer;
+  transition:all 0.2s;
+  font-weight:500;
+  font-family:'Inter',sans-serif;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  white-space:nowrap;
+}
+
+.action-btn:hover{
+  background:var(--primary);
+  color:white;
+  border-color:var(--primary);
+  transform:translateY(-1px);
+  box-shadow:0 4px 8px rgba(14,164,122,0.2);
+}
+
+.chat-messages{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  padding:28px 32px;
+  display:flex;
+  flex-direction:column;
+  gap:20px;
+  scroll-behavior:smooth;
+}
+
+.chat-messages::-webkit-scrollbar{
+  width:8px;
+}
+.chat-messages::-webkit-scrollbar-track{
+  background:transparent;
+}
+.chat-messages::-webkit-scrollbar-thumb{
+  background:#d1d5db;
+  border-radius:4px;
+}
+
+/* ---------------- MESSAGES ---------------- */
+.message{
+  max-width:78%;
+  padding:16px 20px;
+  border-radius:16px;
+  line-height:1.6;
+  font-size:14.5px;
+  position:relative;
+  animation:messageSlide 0.3s ease-out;
+}
+
+@keyframes messageSlide{
+  from{
+    opacity:0;
+    transform:translateY(10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.message.user{
+  align-self:flex-end;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;
+  border-bottom-right-radius:4px;
+  box-shadow:var(--shadow-md);
+}
+
+.message.bot{
+  align-self:flex-start;
+  background:#f9fafb;
+  color:var(--text-dark);
+  border-bottom-left-radius:4px;
+  border:1px solid #f3f4f6;
+  box-shadow:0 1px 2px rgba(0,0,0,0.05);
+}
+
+.message.bot .message-content{
+  line-height:1.7;
+}
+
+.message.bot .message-content p{
+  margin:0 0 12px 0;
+  line-height:1.7;
+}
+
+.message.bot .message-content p:last-child{
+  margin-bottom:0;
+}
+
+.message.bot .message-content strong{
+  font-weight:700;
+  color:#1f2937;
+}
+
+.message.bot .message-content em{
+  font-style:italic;
+  color:#6b7280;
+}
+
+.message.bot .message-content .response-section{
+  margin-bottom:16px;
+}
+
+.message.bot .message-content .response-section:last-child{
+  margin-bottom:0;
+}
+
+.message.bot .message-content .section-title{
+  font-weight:700;
+  font-size:15px;
+  color:var(--primary);
+  margin-bottom:10px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.message.bot .message-content ul,
+.message.bot .message-content ol{
+  margin:0;
+  padding-left:24px;
+  list-style-position:outside;
+}
+
+.message.bot .message-content ul{
+  list-style-type:disc;
+}
+
+.message.bot .message-content li{
+  margin:8px 0;
+  line-height:1.7;
+  padding-left:4px;
+}
+
+.message.bot .message-content li strong{
+  color:var(--text-dark);
+}
+
+.message.bot .message-content .key-points{
+  background:rgba(14,164,122,0.06);
+  border-left:3px solid var(--primary);
+  padding:16px 18px;
+  border-radius:8px;
+  margin:16px 0;
+}
+
+.message.bot .message-content .key-points ul{
+  margin-top:8px;
+}
+
+.message.bot .message-content .tip-box{
+  background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(245,158,11,0.05));
+  border-left:3px solid #f59e0b;
+  padding:14px 18px;
+  border-radius:8px;
+  margin:14px 0;
+}
+
+.message.bot .message-content .example-box{
+  background:rgba(99,102,241,0.06);
+  border-left:3px solid #6366f1;
+  padding:16px 18px;
+  border-radius:8px;
+  margin:16px 0;
+}
+
+.message.bot .message-content .opening{
+  color:var(--primary);
+  font-weight:600;
+  margin-bottom:16px;
+  font-size:15px;
+}
+
+.message.bot .message-content .closing{
+  color:#6b7280;
+  font-size:13.5px;
+  margin-top:16px;
+  padding-top:14px;
+  border-top:1px solid #f3f4f6;
+}
+
+.message-avatar{
+  width:32px;
+  height:32px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  font-weight:600;
+  margin-bottom:8px;
+  background:linear-gradient(135deg,var(--primary),var(--accent));
+  color:white;
+}
+
+.message-content{
+  white-space:pre-wrap;
+  word-wrap:break-word;
+}
+
+.message-meta{
+  font-size:11px;
+  opacity:0.6;
+  margin-top:8px;
+}
+
+.skeleton-loader{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  padding:16px;
+}
+
+.skeleton-line{
+  height:16px;
+  border-radius:8px;
+  background:linear-gradient(90deg,#e5e7eb 25%,#f3f4f6 50%,#e5e7eb 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+}
+
+.skeleton-line:nth-child(1){width:90%;}
+.skeleton-line:nth-child(2){width:75%;}
+.skeleton-line:nth-child(3){width:60%;}
+
+@keyframes shimmer{
+  0%{background-position:200% 0;}
+  100%{background-position:-200% 0;}
+}
+
+.welcome-message{
+  text-align:center;
+  padding:60px 40px;
+  max-width:600px;
+  margin:auto;
+}
+
+.welcome-icon{
+  font-size:64px;
+  margin-bottom:20px;
+  opacity:0.8;
+}
+
+.welcome-title{
+  font-size:28px;
+  font-weight:700;
+  margin-bottom:12px;
+  color:var(--text-dark);
+}
+
+.welcome-subtitle{
+  font-size:15px;
+  color:var(--text-light);
+  line-height:1.6;
+}
+
+/* ---------------- INPUT ---------------- */
+.chat-input-wrapper{
+  border-top:1px solid var(--border);
+  padding:20px 32px 24px;
+  background:white;
+  flex-shrink:0;
+  position:relative;
+}
+
+.attached-pdf-preview{
+  display:none;
+  background:#f0fdf4;
+  border:1px solid var(--primary);
+  border-radius:10px;
+  padding:12px 16px;
+  margin-bottom:12px;
+  position:relative;
+}
+
+.attached-pdf-preview.active{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  animation:slideDown 0.3s ease;
+}
+
+@keyframes slideDown{
+  from{
+    opacity:0;
+    transform:translateY(-10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.attached-pdf-icon{
+  color:var(--primary);
+  font-size:24px;
+}
+
+.attached-pdf-info{
+  flex:1;
+  min-width:0;
+}
+
+.attached-pdf-name{
+  font-size:13px;
+  font-weight:600;
+  color:var(--text-dark);
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+
+.attached-pdf-size{
+  font-size:11px;
+  color:var(--text-light);
+  margin-top:2px;
+}
+
+.attached-pdf-remove{
+  background:rgba(239,68,68,0.1);
+  border:none;
+  color:#ef4444;
+  width:28px;
+  height:28px;
+  border-radius:6px;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:14px;
+  flex-shrink:0;
+}
+
+.attached-pdf-remove:hover{
+  background:#ef4444;
+  color:white;
+}
+
+.chat-input{
+  display:flex;
+  gap:12px;
+  align-items:flex-end;
+}
+
+.input-container{
+  flex:1;
+  position:relative;
+}
+
+textarea{
+  width:100%;
+  flex:1;
+  resize:none;
+  padding:14px 18px;
+  border-radius:14px;
+  border:2px solid var(--border);
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;
+  outline:none;
+  transition:all 0.2s;
+  min-height:52px;
+  max-height:120px;
+}
+
+textarea:focus{
+  border-color:var(--primary);
+  box-shadow:0 0 0 3px rgba(14,164,122,0.1);
+}
+
+textarea::placeholder{
+  color:#9ca3af;
+  font-weight:400;
+}
+
+.send-btn{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:white;
+  border:none;
+  padding:14px 28px;
+  border-radius:14px;
+  font-weight:600;
+  font-size:15px;
+  cursor:pointer;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  box-shadow:var(--shadow-md);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:52px;
+  font-family:'Inter',sans-serif;
+}
+
+.upload-btn{
+  background:rgba(14,164,122,0.1);
+  color:var(--primary);
+  border:2px solid var(--primary);
+  padding:14px 20px;
+  border-radius:14px;
+  font-weight:600;
+  font-size:15px;
+  cursor:pointer;
+  transition:all 0.3s cubic-bezier(0.4,0,0.2,1);
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-height:52px;
+  font-family:'Inter',sans-serif;
+}
+
+.upload-btn:hover{
+  background:var(--primary);
+  color:white;
+  transform:translateY(-2px);
+  box-shadow:0 6px 12px rgba(14,164,122,0.25);
+}
+
+.upload-btn input[type="file"]{
+  display:none;
+}
+
+.send-btn:hover:not(:disabled){
+  transform:translateY(-2px);
+  box-shadow:0 10px 15px rgba(14,164,122,0.3);
+}
+
+.send-btn:disabled{
+  opacity:0.5;
+  cursor:not-allowed;
+}
+
+.spinner{
+  display:inline-block;
+  width:16px;
+  height:16px;
+  border:2px solid rgba(255,255,255,0.3);
+  border-top-color:white;
+  border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+
+@keyframes spin{
+  to{transform:rotate(360deg);}
+}
+
+.uploading{
+  pointer-events:none;
+  opacity:0.6;
+}
+
+@keyframes fadeIn{
+  from{
+    opacity:0;
+    transform:scale(0.95);
+  }
+  to{
+    opacity:1;
+    transform:scale(1);
+  }
+}
+
+/* ---------------- MOBILE ---------------- */
+@media(max-width:900px){
+  .app-container{
+    grid-template-columns:1fr;
+  }
+  
+  .hamburger-btn{
+    display:flex;
+    padding:2px 3px;
+    font-size:6px;
+    gap:1px;
+    border-radius:6px;
+  }
+  
+  .hamburger-btn i{
+    font-size:6px;
+  }
+  
+  .action-btn[onclick="checkStats()"]{
+    display:none;
+  }
+  
+  .sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    bottom:0;
+    width:280px;
+    transform:translateX(-100%);
+    box-shadow:4px 0 20px rgba(0,0,0,0.3);
+    z-index:1000;
+  }
+  
+  .sidebar.active{
+    transform:translateX(0);
+  }
+  
+  .chat-header{
+    padding:10px 6px;
+    flex-wrap:nowrap;
+    gap:2px;
+  }
+  
+  .header-title{
+    font-size:10px;
+    flex-shrink:1;
+    min-width:0;
+    margin-right:2px;
+    gap:2px;
+  }
+  
+  .header-title i{
+    font-size:10px;
+    flex-shrink:0;
+  }
+  
+  .header-actions{
+    flex-wrap:nowrap;
+    gap:10px;
+    flex-shrink:0;
+  }
+  
+  .action-btn{
+    padding:2px 3px;
+    font-size:12px;
+    min-width:auto;
+    gap:1px;
+    border-radius:6px;
+  }
+  
+  .action-btn i{
+    font-size:12px;
+    margin-right:0;
+  }
+  
+  .chat-messages{
+    padding:16px 12px;
+  }
+  
+  .message{
+    max-width:88%;
+    font-size:13.5px;
+    padding:14px 16px;
+  }
+  
+  .chat-input-wrapper{
+    padding:6px 4px;
+  }
+  
+  .attached-pdf-preview{
+    padding:10px 12px;
+    margin-bottom:10px;
+  }
+  
+  .attached-pdf-name{
+    font-size:12px;
+  }
+  
+  .attached-pdf-size{
+    font-size:10px;
+  }
+  
+  .chat-input{
+    gap:4px;
+  }
+  
+  textarea{
+    padding:6px 10px;
+    font-size:10px;
+    min-height:40px;
+  }
+  
+  .send-btn,
+  .upload-btn{
+    padding:6px;
+    min-height:40px;
+    min-width:40px;
+    flex-shrink:0;
+  }
+  
+  .send-btn i,
+  .upload-btn i{
+    font-size:10px;
+  }
+  
+  .send-btn span,
+  .upload-btn span{
+    display:none;
+  }
+}
+
+@media(max-width:600px){
+  .chat-header{
+    padding:6px 10px;
+    gap:1px;
+  }
+  
+  .header-title{
+    font-size:9px;
+    gap:1px;
+  }
+  
+  .header-title i{
+    font-size:9px;
+  }
+  
+  .header-actions{
+    gap:10px;
+  }
+  
+  .hamburger-btn,
+  .action-btn{
+    padding:3px 4px;
+    font-size:10px;
+    border-radius:5px;
+    gap:1px;
+  }
+  
+  .hamburger-btn i,
+  .action-btn i{
+    font-size:10px;
+  }
+  
+  .chat-messages{
+    padding:14px 10px;
+  }
+  
+  .message{
+    max-width:92%;
+    padding:12px 14px;
+    font-size:13px;
+  }
+  
+  .chat-input-wrapper{
+    padding:6px 4px;
+  }
+  
+  .attached-pdf-preview{
+    padding:8px 10px;
+    margin-bottom:8px;
+  }
+  
+  .chat-input{
+    gap:3px;
+  }
+  
+  textarea{
+    padding:6px 10px;
+    font-size:10px;
+    min-height:36px;
+  }
+  
+  .send-btn,
+  .upload-btn{
+    padding:6px;
+    min-height:36px;
+    min-width:36px;
+  }
+  
+  .send-btn i,
+  .upload-btn i{
+    font-size:10px;
+  }
+  
+  .welcome-message{
+    padding:30px 16px;
+  }
+  
+  .welcome-icon{
+    font-size:42px;
+  }
+  
+  .welcome-title{
+    font-size:20px;
+  }
+  
+  .welcome-subtitle{
+    font-size:13px;
+  }
+}
+
+@media(max-width:380px){
+  .chat-header{
+    padding:10px 24px;
+    gap:-1px;
+  }
+  
+  .header-title{
+    font-size:10px;
+    gap:1px;
+  }
+  
+  /* .header-title span{
+    display:none;
+  } */
+  
+  .header-title i{
+    font-size:12px;
+  }
+  
+  .header-actions{
+    gap:10px;
+  }
+  
+  .hamburger-btn,
+  .action-btn{
+    padding:3px 4px;
+    font-size:10px;
+    border-radius:4px;
+  }
+  
+  .hamburger-btn i,
+  .action-btn i{
+    font-size:10px;
+  }
+  
+  .chat-input-wrapper{
+    padding:4px 10px;
+  }
+  
+  .chat-input{
+    gap:2px;
+  }
+  
+  textarea{
+    padding:6px 8px;
+    font-size:10px;
+    min-height:36px;
+  }
+  
+  .send-btn,
+  .upload-btn{
+    padding:10px;
+    min-height:36px;
+    min-width:36px;
+  }
+  
+  .send-btn i,
+  .upload-btn i{
+    font-size:14px;
+  }
+}
+
+@media(min-width:1400px){
+  .app-container{
+    grid-template-columns:380px 1fr;
+  }
+}
+</style>
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="app-container">
+
+  <!-- ==================== SIDEBAR ==================== -->
+  <div class="sidebar">
+    <div class="brand">
+      <i class="fas fa-brain"></i>
+      <span>RAG Intelligence</span>
+    </div>
+
+    <div class="upload-section">
+      <label class="upload-card" id="uploadCard">
+        <input type="file" id="pdfInput" accept="application/pdf" />
+        <div class="upload-icon">
+          <i class="fas fa-cloud-upload-alt"></i>
+        </div>
+        <div class="upload-text">Upload PDF Document</div>
+        <div class="upload-hint">Drag & drop or click to browse</div>
+      </label>
+
+      <div class="file-info" id="fileInfo">
+        <button class="file-delete-btn" onclick="removeUploadedFile()" title="Remove PDF">
+          <i class="fas fa-times"></i>
+        </button>
+        <div class="file-name" id="fileName"></div>
+        <div class="file-status">
+          <span class="status-dot"></span>
+          <span id="fileStatus">Processing...</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-history-section" id="chatHistorySection">
+      <div class="chat-history-title">💬 Chat History</div>
+      <div class="chat-sessions" id="chatSessions">
+        <!-- Chat sessions will be populated here -->
+      </div>
+    </div>
+
+    <div class="stats-card" id="statsCard">
+      <div class="stat-item">
+        <span class="stat-label"><i class="fas fa-database"></i> Total Chunks</span>
+        <span class="stat-value" id="totalChunks">0</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-label"><i class="fas fa-file-pdf"></i> Collection</span>
+        <span class="stat-value" id="collectionName">-</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== CHAT AREA ==================== -->
+  <div class="chat-area">
+    <div class="chat-header">
+      <div class="header-title">
+        <i class="fas fa-comments"></i>
+        <span>Ask Questions</span>
+      </div>
+      <div class="header-actions">
+        <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()">
+          <i class="fas fa-bars"></i>
+        </button>
+        <button class="action-btn" onclick="createNewChat()">
+          <i class="fas fa-plus"></i> New Chat
+        </button>
+        <button class="action-btn" onclick="clearChat()">
+          <i class="fas fa-trash-alt"></i> Clear
+        </button>
+        <button class="action-btn" onclick="checkStats()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+      <div class="welcome-message">
+        <div class="welcome-icon">📚</div>
+        <div class="welcome-title">Welcome to RAG Intelligence</div>
+        <div class="welcome-subtitle">
+          Upload a PDF document to get started. Once uploaded, you can ask any questions about the content and get instant, intelligent answers powered by AI.
+        </div>
+      </div>
+    </div>
+
+    <div class="chat-input-wrapper">
+      <div class="attached-pdf-preview" id="attachedPdfPreview">
+        <div class="attached-pdf-icon">
+          <i class="fas fa-file-pdf"></i>
+        </div>
+        <div class="attached-pdf-info">
+          <div class="attached-pdf-name" id="attachedPdfName"></div>
+          <div class="attached-pdf-size" id="attachedPdfSize"></div>
+        </div>
+        <button class="attached-pdf-remove" onclick="removeAttachedPdf()" title="Remove PDF">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="chat-input">
+        <div class="input-container">
+          <textarea 
+            id="questionInput" 
+            placeholder="Ask a question about your document..." 
+            rows="1"
+            onkeydown="handleKeyPress(event)"
+          ></textarea>
+        </div>
+        <label class="upload-btn" title="Upload PDF">
+          <input type="file" id="pdfInputChat" accept="application/pdf" onchange="handleChatPdfUpload(event)" />
+          <i class="fas fa-paperclip"></i>
+          <span>Attach</span>
+        </label>
+        <button class="send-btn" id="sendBtn" onclick="sendQuestion()">
+          <i class="fas fa-paper-plane"></i>
+          <span>Send</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ==================== MOBILE SIDEBAR ====================
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const hamburger = document.getElementById('hamburgerBtn');
+    
+    sidebar.classList.toggle('active');
+    overlay.classList.toggle('active');
+    
+    // Update icon
+    const icon = hamburger.querySelector('i');
+    if (sidebar.classList.contains('active')) {
+      icon.className = 'fas fa-times';
+    } else {
+      icon.className = 'fas fa-bars';
+    }
+  }
+
+  // ==================== CHAT PDF UPLOAD ====================
+  async function handleChatPdfUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.pdf')) {
+      alert('Please upload a PDF file');
+      return;
+    }
+
+    // Show attached PDF preview
+    showAttachedPdf(file);
+    
+    // Also update sidebar file info
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileStatus = document.getElementById('fileStatus');
+    
+    fileName.textContent = file.name;
+    fileStatus.textContent = 'Uploading...';
+    fileInfo.classList.add('active');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(`${API_BASE}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        fileStatus.textContent = 'Processing PDF...';
+        addBotMessage(`✅ PDF "${file.name}" uploaded successfully! Processing in background...`);
+        
+        setTimeout(() => {
+          checkStats();
+          fileStatus.textContent = 'Ready';
+          updateAttachedPdfStatus('Ready');
+          
+          saveCurrentSession();
+          
+          if (currentSessionId) {
+            const sessions = getAllSessions();
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (session && session.name === 'New Chat') {
+              updateSessionName('PDF: ' + file.name);
+            }
+          }
+        }, 2000);
+      } else {
+        throw new Error(result.detail || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      addBotMessage(`❌ Error: ${error.message}`);
+      fileStatus.textContent = 'Failed';
+      removeAttachedPdf();
+    }
+  }
+
+  function showAttachedPdf(file) {
+    const preview = document.getElementById('attachedPdfPreview');
+    const nameEl = document.getElementById('attachedPdfName');
+    const sizeEl = document.getElementById('attachedPdfSize');
+    
+    nameEl.textContent = file.name;
+    sizeEl.textContent = formatFileSize(file.size) + ' • Processing...';
+    preview.classList.add('active');
+  }
+
+  function updateAttachedPdfStatus(status) {
+    const sizeEl = document.getElementById('attachedPdfSize');
+    const currentText = sizeEl.textContent.split(' • ')[0];
+    sizeEl.textContent = currentText + ' • ' + status;
+  }
+
+  function removeAttachedPdf() {
+    const preview = document.getElementById('attachedPdfPreview');
+    preview.classList.remove('active');
+    document.getElementById('pdfInputChat').value = '';
+  }
+
+  function formatFileSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  // ==================== CONFIGURATION ====================
+  const API_BASE = 'http://localhost:10000';
+  let isProcessing = false;
+  let currentSessionId = null;
+
+  // ==================== INITIALIZE ====================
+  document.addEventListener('DOMContentLoaded', () => {
+    checkStats();
+    setupDragAndDrop();
+    autoResizeTextarea();
+    initializeChatSessions();
+    restoreFileInfo();
+  });
+
+  // ==================== FILE UPLOAD ====================
+  document.getElementById('pdfInput').addEventListener('change', handleFileUpload);
+
+  async function handleFileUpload(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.pdf')) {
+      alert('Please upload a PDF file');
+      return;
+    }
+
+    const uploadCard = document.getElementById('uploadCard');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileStatus = document.getElementById('fileStatus');
+
+    uploadCard.classList.add('uploading');
+    fileName.textContent = file.name;
+    fileStatus.textContent = 'Uploading...';
+    fileInfo.classList.add('active');
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const response = await fetch(`${API_BASE}/upload`, {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        fileStatus.textContent = 'Processing PDF...';
+        addBotMessage(`✅ PDF "${file.name}" uploaded successfully! Processing in background...`);
+        
+        // Poll for stats update
+        setTimeout(() => {
+          checkStats();
+          fileStatus.textContent = 'Ready';
+          
+          // Save PDF info with current session
+          saveCurrentSession();
+          
+          // Update session name with PDF name if it's still "New Chat"
+          if (currentSessionId) {
+            const sessions = getAllSessions();
+            const session = sessions.find(s => s.id === currentSessionId);
+            if (session && session.name === 'New Chat') {
+              updateSessionName('PDF: ' + file.name);
+            }
+          }
+        }, 2000);
+      } else {
+        throw new Error(result.detail || 'Upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+      addBotMessage(`❌ Error: ${error.message}`);
+      fileStatus.textContent = 'Failed';
+    } finally {
+      uploadCard.classList.remove('uploading');
+    }
+  }
+
+  // ==================== DRAG AND DROP ====================
+  function setupDragAndDrop() {
+    const uploadCard = document.getElementById('uploadCard');
+    
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+      uploadCard.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+      uploadCard.addEventListener(eventName, () => {
+        uploadCard.style.borderColor = 'rgba(255,255,255,0.7)';
+        uploadCard.style.background = 'rgba(255,255,255,0.25)';
+      });
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+      uploadCard.addEventListener(eventName, () => {
+        uploadCard.style.borderColor = '';
+        uploadCard.style.background = '';
+      });
+    });
+
+    uploadCard.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      document.getElementById('pdfInput').files = files;
+      handleFileUpload({ target: { files } });
+    });
+  }
+
+  // ==================== CHAT FUNCTIONS ====================
+  async function sendQuestion() {
+    const input = document.getElementById('questionInput');
+    const question = input.value.trim();
+    
+    if (!question || isProcessing) return;
+
+    // Clear welcome message if present
+    const welcome = document.querySelector('.welcome-message');
+    if (welcome) welcome.remove();
+
+    addUserMessage(question);
+    input.value = '';
+    input.style.height = 'auto';
+    
+    const loadingMsg = addLoadingMessage();
+    isProcessing = true;
+    updateSendButton(true);
+
+    try {
+      const response = await fetch(`${API_BASE}/ask`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          question: question,
+          top_k: 5,
+          threshold: 0.7
+        })
+      });
+
+      const result = await response.json();
+
+      loadingMsg.remove();
+
+      if (response.ok) {
+        const answer = result.answer || 'No answer received';
+        const mode = result.mode || 'unknown';
+        const sources = result.sources || [];
+        
+        const isFromPDF = mode === 'pdf' && sources.length > 0;
+        
+        addBotMessage(answer, isFromPDF);
+      } else {
+        throw new Error(result.detail || 'Failed to get answer');
+      }
+    } catch (error) {
+      console.error('Ask error:', error);
+      loadingMsg.remove();
+      addBotMessage(`❌ Error: ${error.message}`);
+    } finally {
+      isProcessing = false;
+      updateSendButton(false);
+    }
+  }
+
+  function addUserMessage(text) {
+    const chatMessages = document.getElementById('chatMessages');
+    
+    // Remove welcome message if present
+    const welcome = chatMessages.querySelector('.welcome-message');
+    if (welcome) {
+      welcome.remove();
+      // This is the first message, update session name
+      updateSessionName(text);
+    }
+    
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message user';
+    messageDiv.innerHTML = `
+      <div class="message-content">${escapeHtml(text)}</div>
+      <div class="message-meta">${getCurrentTime()}</div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+    saveCurrentSession();
+  }
+
+  function addBotMessage(text, isFromPDF = false) {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message bot';
+    
+    const formattedContent = formatBotResponse(text, isFromPDF);
+    
+    messageDiv.innerHTML = `
+      <div class="message-avatar"><i class="fas fa-robot"></i></div>
+      <div class="message-content">${formattedContent}</div>
+      <div class="message-meta">${getCurrentTime()}</div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+    saveCurrentSession();
+  }
+
+  function formatBotResponse(rawText, isFromPDF) {
+    // Check if it's an error or simple notification message
+    if (rawText.startsWith('❌') || rawText.startsWith('✅')) {
+      return escapeHtml(rawText);
+    }
+
+    let formattedHTML = '';
+    
+    // 1️⃣ OPENING SECTION
+    const openingEmoji = isFromPDF ? '📘' : '🤖';
+    const openingText = isFromPDF 
+      ? "Here's what I found in your document:"
+      : "Here's the information based on general knowledge:";
+    
+    formattedHTML += `<div class="opening">${openingEmoji} <strong>${openingText}</strong></div>`;
+
+    // 2️⃣ PARSE AND FORMAT THE MAIN CONTENT
+    const sections = parseResponse(rawText);
+    
+    // Render Answer Section
+    if (sections.answer) {
+      formattedHTML += `<div class="response-section">`;
+      formattedHTML += formatContent(sections.answer);
+      formattedHTML += `</div>`;
+    }
+    
+    // Render Key Points Section
+    if (sections.keyPoints && sections.keyPoints.length > 0) {
+      formattedHTML += `
+        <div class="key-points">
+          <div class="section-title">🔑 Key Points</div>
+          <ul>
+            ${sections.keyPoints.map(point => `<li>${formatContent(point)}</li>`).join('')}
+          </ul>
+        </div>
+      `;
+    }
+    
+    // Render Example Section
+    if (sections.example) {
+      formattedHTML += `
+        <div class="example-box">
+          <div class="section-title">🧠 Example</div>
+          ${formatContent(sections.example)}
+        </div>
+      `;
+    }
+    
+    // Render Additional Context
+    if (sections.context) {
+      formattedHTML += `<div class="response-section">`;
+      formattedHTML += formatContent(sections.context);
+      formattedHTML += `</div>`;
+    }
+
+    // 3️⃣ SOURCE INDICATOR
+    if (isFromPDF) {
+      formattedHTML += `
+        <div class="response-section" style="font-size:13.5px;color:#6b7280;margin-top:-8px;">
+          <em>📄 This answer is based on your uploaded document.</em>
+        </div>
+      `;
+    } else {
+      formattedHTML += `
+        <div class="response-section" style="font-size:13.5px;color:#6b7280;margin-top:-80px;">
+          <em>📚 This answer is based on general knowledge, not the uploaded document.</em>
+        </div>
+      `;
+    }
+
+    // 4️⃣ HELPFUL CLOSING TIP
+    const tips = [
+      "💡 <strong>Tip:</strong> You can ask me to explain this with an example.",
+      "💡 <strong>Tip:</strong> Ask for more details about any specific part.",
+      "💡 <strong>Tip:</strong> Need a simpler explanation? Just ask!",
+      "💡 <strong>Tip:</strong> Feel free to ask follow-up questions for clarity."
+    ];
+    const randomTip = tips[Math.floor(Math.random() * tips.length)];
+    
+    formattedHTML += `<div class="closing">${randomTip}</div>`;
+
+    return formattedHTML;
+  }
+
+  function parseResponse(text) {
+    const sections = {
+      answer: '',
+      keyPoints: [],
+      example: '',
+      context: ''
+    };
+    
+    // Split by common section markers
+    const answerMatch = text.match(/\*\*Answer:\*\*\s*([\s\S]*?)(?=\*\*Key Points:\*\*|\*\*Example:\*\*|\*\*Additional Context:\*\*|$)/i);
+    const keyPointsMatch = text.match(/\*\*Key Points:\*\*\s*([\s\S]*?)(?=\*\*Example:\*\*|\*\*Additional Context:\*\*|$)/i);
+    const exampleMatch = text.match(/\*\*Example:\*\*\s*([\s\S]*?)(?=\*\*Additional Context:\*\*|$)/i);
+    const contextMatch = text.match(/\*\*Additional Context:\*\*\s*([\s\S]*?)$/i);
+    
+    if (answerMatch) {
+      sections.answer = answerMatch[1].trim();
+    } else {
+      // If no structured format, use the whole text as answer
+      sections.answer = text.trim();
+    }
+    
+    if (keyPointsMatch) {
+      const pointsText = keyPointsMatch[1].trim();
+      // Parse bullet points
+      sections.keyPoints = pointsText
+        .split(/\n/)
+        .map(line => line.replace(/^[\*\-]\s*/, '').trim())
+        .filter(line => line.length > 0);
+    }
+    
+    if (exampleMatch) {
+      sections.example = exampleMatch[1].trim();
+    }
+    
+    if (contextMatch) {
+      sections.context = contextMatch[1].trim();
+    }
+    
+    return sections;
+  }
+
+  function formatContent(text) {
+    if (!text) return '';
+    
+    // Convert **bold** markdown to HTML
+    let formatted = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    
+    // Convert *italic* markdown to HTML
+    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
+    
+    // Convert bullet points to proper format
+    const lines = formatted.split('\n');
+    let html = '';
+    let inList = false;
+    
+    for (let line of lines) {
+      line = line.trim();
+      if (!line) continue;
+      
+      if (line.startsWith('* ') || line.startsWith('- ')) {
+        if (!inList) {
+          html += '<ul>';
+          inList = true;
+        }
+        html += `<li>${line.substring(2)}</li>`;
+      } else {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+        html += `<p>${line}</p>`;
+      }
+    }
+    
+    if (inList) {
+      html += '</ul>';
+    }
+    
+    return html;
+  }
+
+  function addLoadingMessage() {
+    const chatMessages = document.getElementById('chatMessages');
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message bot';
+    messageDiv.innerHTML = `
+      <div class="message-avatar"><i class="fas fa-robot"></i></div>
+      <div class="skeleton-loader">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    `;
+    chatMessages.appendChild(messageDiv);
+    scrollToBottom();
+    return messageDiv;
+  }
+
+  // ==================== STATS ====================
+  async function checkStats() {
+    try {
+      const response = await fetch(`${API_BASE}/stats`);
+      const stats = await response.json();
+      
+      document.getElementById('totalChunks').textContent = stats.total_chunks || 0;
+      document.getElementById('collectionName').textContent = stats.collection || '-';
+    } catch (error) {
+      console.error('Stats error:', error);
+    }
+  }
+
+  // ==================== UTILITY FUNCTIONS ====================
+  function clearChat() {
+    if (!currentSessionId) return;
+    
+    const confirmed = confirm('Are you sure you want to clear this chat? This will delete all messages in the current conversation.');
+    if (!confirmed) return;
+    
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = `
+      <div class="welcome-message">
+        <div class="welcome-icon">📚</div>
+        <div class="welcome-title">Welcome to RAG Intelligence</div>
+        <div class="welcome-subtitle">
+          Upload a PDF document to get started. Once uploaded, you can ask any questions about the content and get instant, intelligent answers powered by AI.
+        </div>
+      </div>
+    `;
+    
+    // Update current session
+    const sessions = getAllSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === currentSessionId);
+    if (sessionIndex !== -1) {
+      sessions[sessionIndex].messages = chatMessages.innerHTML;
+      sessions[sessionIndex].name = 'New Chat';
+      localStorage.setItem('chatSessions', JSON.stringify(sessions));
+      renderChatSessions();
+    }
+  }
+
+  function handleKeyPress(event) {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      sendQuestion();
+    }
+  }
+
+  function autoResizeTextarea() {
+    const textarea = document.getElementById('questionInput');
+    textarea.addEventListener('input', function() {
+      this.style.height = 'auto';
+      this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+    });
+  }
+
+  function updateSendButton(disabled) {
+    const sendBtn = document.getElementById('sendBtn');
+    sendBtn.disabled = disabled;
+    
+    if (disabled) {
+      sendBtn.innerHTML = '<div class="spinner"></div><span>Sending...</span>';
+    } else {
+      sendBtn.innerHTML = '<i class="fas fa-paper-plane"></i><span>Send</span>';
+    }
+  }
+
+  function scrollToBottom() {
+    const chatMessages = document.getElementById('chatMessages');
+    setTimeout(() => {
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }, 100);
+  }
+
+  function getCurrentTime() {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  // ==================== CHAT SESSION MANAGEMENT ====================
+  function initializeChatSessions() {
+    const sessions = getAllSessions();
+    
+    if (sessions.length === 0) {
+      // Create first session
+      createNewChat();
+    } else {
+      // Load the last active session
+      const lastSessionId = localStorage.getItem('lastSessionId');
+      const sessionToLoad = lastSessionId || sessions[sessions.length - 1].id;
+      loadChatSession(sessionToLoad);
+    }
+    
+    renderChatSessions();
+  }
+
+  function createNewChat() {
+    // Save current session before creating new one
+    if (currentSessionId) {
+      saveCurrentSession();
+    }
+    
+    const sessionId = 'session_' + Date.now();
+    const newSession = {
+      id: sessionId,
+      name: 'New Chat',
+      messages: '',
+      pdfInfo: null,
+      timestamp: Date.now()
+    };
+    
+    // Save new session
+    const sessions = getAllSessions();
+    sessions.push(newSession);
+    localStorage.setItem('chatSessions', JSON.stringify(sessions));
+    
+    // Set as current session
+    currentSessionId = sessionId;
+    localStorage.setItem('lastSessionId', sessionId);
+    
+    // Clear chat display
+    const chatMessages = document.getElementById('chatMessages');
+    chatMessages.innerHTML = `
+      <div class="welcome-message">
+        <div class="welcome-icon">📚</div>
+        <div class="welcome-title">Welcome to RAG Intelligence</div>
+        <div class="welcome-subtitle">
+          Upload a PDF document to get started. Once uploaded, you can ask any questions about the content and get instant, intelligent answers powered by AI.
+        </div>
+      </div>
+    `;
+    
+    // Clear PDF info display
+    clearFileInfoDisplay();
+    
+    renderChatSessions();
+  }
+
+  function getAllSessions() {
+    const sessionsData = localStorage.getItem('chatSessions');
+    return sessionsData ? JSON.parse(sessionsData) : [];
+  }
+
+  function saveCurrentSession() {
+    if (!currentSessionId) return;
+    
+    const sessions = getAllSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === currentSessionId);
+    
+    if (sessionIndex !== -1) {
+      const chatMessages = document.getElementById('chatMessages');
+      sessions[sessionIndex].messages = chatMessages.innerHTML;
+      sessions[sessionIndex].timestamp = Date.now();
+      
+      // Save current PDF info with session
+      const fileInfo = getCurrentFileInfo();
+      sessions[sessionIndex].pdfInfo = fileInfo;
+      
+      localStorage.setItem('chatSessions', JSON.stringify(sessions));
+    }
+  }
+
+  function loadChatSession(sessionId) {
+    // Save current session first
+    if (currentSessionId) {
+      saveCurrentSession();
+    }
+    
+    const sessions = getAllSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    
+    if (session) {
+      currentSessionId = sessionId;
+      localStorage.setItem('lastSessionId', sessionId);
+      
+      const chatMessages = document.getElementById('chatMessages');
+      chatMessages.innerHTML = session.messages || `
+        <div class="welcome-message">
+          <div class="welcome-icon">📚</div>
+          <div class="welcome-title">Welcome to RAG Intelligence</div>
+          <div class="welcome-subtitle">
+            Upload a PDF document to get started. Once uploaded, you can ask any questions about the content and get instant, intelligent answers powered by AI.
+          </div>
+        </div>
+      `;
+      
+      // Restore PDF info for this session
+      if (session.pdfInfo) {
+        restoreFileInfoDisplay(session.pdfInfo);
+      } else {
+        clearFileInfoDisplay();
+      }
+      
+      scrollToBottom();
+      renderChatSessions();
+    }
+  }
+
+  function deleteChatSession(sessionId, event) {
+    event.stopPropagation();
+    
+    const sessions = getAllSessions();
+    const filteredSessions = sessions.filter(s => s.id !== sessionId);
+    
+    localStorage.setItem('chatSessions', JSON.stringify(filteredSessions));
+    
+    // If deleting current session, switch to another
+    if (currentSessionId === sessionId) {
+      if (filteredSessions.length > 0) {
+        loadChatSession(filteredSessions[filteredSessions.length - 1].id);
+      } else {
+        createNewChat();
+      }
+    } else {
+      renderChatSessions();
+    }
+  }
+
+  function updateSessionName(firstUserMessage) {
+    if (!currentSessionId) return;
+    
+    const sessions = getAllSessions();
+    const sessionIndex = sessions.findIndex(s => s.id === currentSessionId);
+    
+    if (sessionIndex !== -1 && sessions[sessionIndex].name === 'New Chat') {
+      // Generate name from first message (first 40 chars) or PDF name
+      let sessionName;
+      
+      const pdfInfo = getCurrentFileInfo();
+      if (pdfInfo && pdfInfo.name) {
+        // Use PDF name without extension
+        const pdfNameWithoutExt = pdfInfo.name.replace(/\.pdf$/i, '');
+        sessionName = pdfNameWithoutExt.length > 35 
+          ? pdfNameWithoutExt.substring(0, 35) + '...' 
+          : pdfNameWithoutExt;
+      } else {
+        // Use first user message
+        sessionName = firstUserMessage.length > 40 
+          ? firstUserMessage.substring(0, 40) + '...' 
+          : firstUserMessage;
+      }
+      
+      sessions[sessionIndex].name = sessionName;
+      localStorage.setItem('chatSessions', JSON.stringify(sessions));
+      renderChatSessions();
+    }
+  }
+
+  function renderChatSessions() {
+    const sessions = getAllSessions();
+    const sessionsContainer = document.getElementById('chatSessions');
+    
+    if (sessions.length === 0) {
+      sessionsContainer.innerHTML = '<div style="opacity:0.6;font-size:12px;padding:8px 4px;">No chat history yet</div>';
+      return;
+    }
+    
+    // Sort by timestamp (newest first)
+    sessions.sort((a, b) => b.timestamp - a.timestamp);
+    
+    sessionsContainer.innerHTML = sessions.map(session => `
+      <div class="chat-session-item ${session.id === currentSessionId ? 'active' : ''}" 
+           onclick="loadChatSession('${session.id}')">
+        <div class="chat-session-name">
+          <i class="fas fa-comment-dots" style="margin-right:6px;font-size:11px;"></i>
+          ${escapeHtml(session.name)}
+        </div>
+        <button class="chat-session-delete" onclick="deleteChatSession('${session.id}', event)">
+          <i class="fas fa-trash"></i>
+        </button>
+      </div>
+    `).join('');
+  }
+
+  function getCurrentFileInfo() {
+    const fileInfo = document.getElementById('fileInfo');
+    if (!fileInfo.classList.contains('active')) return null;
+    
+    const fileName = document.getElementById('fileName').textContent;
+    const fileStatus = document.getElementById('fileStatus').textContent;
+    
+    return fileName ? { name: fileName, status: fileStatus } : null;
+  }
+
+  function restoreFileInfoDisplay(pdfInfo) {
+    if (!pdfInfo) return;
+    
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileStatus = document.getElementById('fileStatus');
+    
+    fileName.textContent = pdfInfo.name;
+    fileStatus.textContent = pdfInfo.status;
+    fileInfo.classList.add('active');
+    
+    // Also show in attached preview
+    const preview = document.getElementById('attachedPdfPreview');
+    const nameEl = document.getElementById('attachedPdfName');
+    const sizeEl = document.getElementById('attachedPdfSize');
+    
+    nameEl.textContent = pdfInfo.name;
+    sizeEl.textContent = pdfInfo.status;
+    preview.classList.add('active');
+  }
+
+  function clearFileInfoDisplay() {
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileStatus = document.getElementById('fileStatus');
+    
+    fileName.textContent = '';
+    fileStatus.textContent = '';
+    fileInfo.classList.remove('active');
+    
+    // Reset file inputs
+    document.getElementById('pdfInput').value = '';
+    document.getElementById('pdfInputChat').value = '';
+    
+    // Clear attached preview
+    removeAttachedPdf();
+  }
+
+  function removeUploadedFile() {
+    const confirmed = confirm('Remove this PDF from the current chat?');
+    if (!confirmed) return;
+    
+    clearFileInfoDisplay();
+    
+    // Update current session to remove PDF info
+    if (currentSessionId) {
+      const sessions = getAllSessions();
+      const sessionIndex = sessions.findIndex(s => s.id === currentSessionId);
+      if (sessionIndex !== -1) {
+        sessions[sessionIndex].pdfInfo = null;
+        localStorage.setItem('chatSessions', JSON.stringify(sessions));
+      }
+    }
+    
+    addBotMessage('📄 PDF removed from this chat. You can upload a new one if needed.');
+  }
+
+  function saveFileInfo(fileName, status) {
+    const fileData = {
+      name: fileName,
+      status: status,
+      timestamp: new Date().getTime()
+    };
+    localStorage.setItem('fileInfo', JSON.stringify(fileData));
+  }
+
+  function restoreFileInfo() {
+    const savedFileInfo = localStorage.getItem('fileInfo');
+    if (savedFileInfo) {
+      try {
+        const fileData = JSON.parse(savedFileInfo);
+        const fileInfo = document.getElementById('fileInfo');
+        const fileName = document.getElementById('fileName');
+        const fileStatus = document.getElementById('fileStatus');
+        
+        fileName.textContent = fileData.name;
+        fileStatus.textContent = fileData.status;
+        fileInfo.classList.add('active');
+      } catch (e) {
+        console.error('Error restoring file info:', e);
+      }
+    }
+  }
+
+  // Auto-refresh stats every 30 seconds
+  setInterval(checkStats, 30000);
+</script>
+
+</body>
+</html>

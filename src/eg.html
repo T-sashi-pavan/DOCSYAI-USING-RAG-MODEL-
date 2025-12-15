@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PDF Q&A – RAG Assistant</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #0ea47a;
+      --secondary: #0b3c2d;
+      --bg-gradient: linear-gradient(135deg, #f5fffb, #e8f8f1);
+      --card-bg: #ffffff;
+      --text-dark: #1f2937;
+      --text-light: #6b7280;
+      --border: #e5e7eb;
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-gradient);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      color: var(--text-dark);
+    }
+
+    .app-container {
+      width: 100%;
+      max-width: 1100px;
+      height: 90vh;
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+      display: grid;
+      grid-template-columns: 320px 1fr;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: linear-gradient(180deg, #0ea47a, #087a5b);
+      padding: 24px;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .upload-card {
+      background: rgba(255,255,255,0.15);
+      border: 2px dashed rgba(255,255,255,0.4);
+      border-radius: 14px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .upload-card:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    .upload-card input {
+      display: none;
+    }
+
+    .upload-card span {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+
+    .status {
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* Chat Area */
+    .chat-area {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .chat-header {
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+      font-weight: 600;
+      font-size: 16px;
+      background: #ffffffcc;
+      backdrop-filter: blur(6px);
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 24px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .message {
+      max-width: 75%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      line-height: 1.5;
+      font-size: 14px;
+    }
+
+    .user {
+      align-self: flex-end;
+      background: var(--primary);
+      color: white;
+      border-bottom-right-radius: 4px;
+    }
+
+    .bot {
+      align-self: flex-start;
+      background: #f3f4f6;
+      color: var(--text-dark);
+      border-bottom-left-radius: 4px;
+    }
+
+    /* Skeleton loader */
+    .skeleton {
+      width: 220px;
+      height: 18px;
+      border-radius: 6px;
+      background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 37%, #e5e7eb 63%);
+      background-size: 400% 100%;
+      animation: shimmer 1.4s infinite;
+    }
+
+    @keyframes shimmer {
+      0% { background-position: 100% 0; }
+      100% { background-position: -100% 0; }
+    }
+
+    /* Input */
+    .chat-input {
+      padding: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 12px;
+    }
+
+    .chat-input input {
+      flex: 1;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      font-size: 14px;
+      outline: none;
+    }
+
+    .chat-input button {
+      background: var(--primary);
+      border: none;
+      color: white;
+      padding: 0 22px;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+
+    .chat-input button:hover {
+      background: #0b8f6b;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 900px) {
+      .app-container {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .upload-card {
+        padding: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="brand">📄 PDF Q&A RAG</div>
+
+    <label class="upload-card">
+      <input type="file" accept="application/pdf" />
+      <span>Upload PDF<br/>Drag & Drop or Click</span>
+    </label>
+
+    <div class="status">Status: Waiting for PDF</div>
+  </div>
+
+  <!-- Chat -->
+  <div class="chat-area">
+    <div class="chat-header">Ask questions from your document</div>
+
+    <div class="chat-messages" id="chat">
+      <div class="message bot">Upload a PDF and start asking questions.</div>
+    </div>
+
+    <div class="chat-input">
+      <input type="text" id="question" placeholder="Ask something about the PDF..." />
+      <button onclick="sendQuestion()">Send</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const chat = document.getElementById('chat');
+
+  function sendQuestion() {
+    const input = document.getElementById('question');
+    const text = input.value.trim();
+    if (!text) return;
+
+    chat.innerHTML += `<div class="message user">${text}</div>`;
+    input.value = '';
+
+    const skeleton = document.createElement('div');
+    skeleton.className = 'message bot';
+    skeleton.innerHTML = '<div class="skeleton"></div>';
+    chat.appendChild(skeleton);
+    chat.scrollTop = chat.scrollHeight;
+
+    setTimeout(() => {
+      skeleton.innerHTML = 'This is a sample streamed response from the RAG backend.';
+    }, 1500);
+  }
+</script>
+
+</body>
+</html>

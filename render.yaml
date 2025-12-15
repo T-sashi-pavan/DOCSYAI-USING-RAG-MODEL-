@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: pdf-qa-chatbot
+    env: python
+    region: singapore # Choose the region closest to your users
+    plan: free # Start with free tier
+    buildCommand: pip install --no-cache-dir -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT --timeout-keep-alive 120
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11
+      - key: GROQ_API_KEY
+        sync: false # Will be set in Render dashboard
+      - key: HUGGINGFACE_API_KEY
+        sync: false # Will be set in Render dashboard
+      - key: SUPABASE_URL
+        sync: false # Will be set in Render dashboard
+      - key: SUPABASE_ANON_KEY
+        sync: false # Will be set in Render dashboard
+    healthCheckPath: /health
+    autoDeploy: true # Auto-deploy on push to the main branch
