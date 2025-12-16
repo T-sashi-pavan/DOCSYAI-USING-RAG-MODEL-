@@ -1,4 +1,4 @@
-# Core dependencies - simplified for Render deployment
+# Core dependencies - fixed version compatibility
 pypdf==4.0.1
 groq==0.4.0
 fastapi==0.104.1
@@ -10,3 +10,4 @@ supabase==2.3.5
 python-multipart==0.0.6
 python-dotenv==1.0.0
 numpy
+httpx==0.24.1  # Compatible with supabase 2.3.5
