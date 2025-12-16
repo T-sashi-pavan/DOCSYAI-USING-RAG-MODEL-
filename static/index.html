@@ -1551,15 +1551,15 @@ textarea::placeholder{
     
     // Add source indicator
     let sourceText = '';
-    // if (isFromPDF) {
-    //   sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
-    //     <em>📄 Answer from your document</em>
-    //   </div>`;
-    // } else {
-    //   sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
-    //     <em>🤖 General knowledge (not from uploaded document)</em>
-    //   </div>`;
-    // }
+    if (isFromPDF) {
+      sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+        <em>📄 Answer from your document</em>
+      </div>`;
+    } else {
+      sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+        <em>🤖 General knowledge (not from uploaded document)</em>
+      </div>`;
+    }
     
     return cleanText + sourceText;
   }
