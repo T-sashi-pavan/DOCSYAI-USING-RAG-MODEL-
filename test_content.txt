@@ -1,0 +1,17 @@
+Machine Learning Basics
+
+What is Machine Learning?
+
+Machine learning is a subset of artificial intelligence (AI) that enables
+systems to learn and improve from experience without being explicitly programmed.
+
+Key Concepts:
+
+1. Supervised Learning - Learning from labeled data
+2. Unsupervised Learning - Finding patterns in unlabeled data  
+3. Reinforcement Learning - Learning through trial and error
+4. Neural Networks - Foundation of deep learning
+
+Applications: NLP, Computer Vision, Recommendations, Autonomous Vehicles
+
+This document can be used to test text processing if PDF creation fails.

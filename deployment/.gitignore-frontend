@@ -1,0 +1,64 @@
+# Frontend-only deployment - exclude backend files
+
+# Python
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+
+# Backend source code
+src/
+main.py
+config.py
+verify_setup.py
+test_*.py
+
+# Dependencies and configs
+requirements.txt
+Dockerfile
+docker-compose.yml
+render.yaml
+deploy.sh
+
+# Deployment scripts (backend only)
+deployment/
+
+# Environment and secrets
+.env
+.env.*
+
+# Uploads and logs
+uploads/
+logs/
+*.log
+
+# Database
+*.db
+*.sqlite
+
+# Git
+.git/
+.gitignore
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.old

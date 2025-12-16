@@ -1,0 +1,23 @@
+[Unit]
+Description=RAG Chatbot Backend API
+After=network.target
+
+[Service]
+Type=simple
+User=raguser
+WorkingDirectory=/home/raguser/ragbackend
+Environment="PATH=/home/raguser/ragbackend/venv/bin:/usr/local/bin:/usr/bin:/bin"
+ExecStart=/home/raguser/ragbackend/venv/bin/uvicorn main:app --host 0.0.0.0 --port 10000 --workers 1
+Restart=always
+RestartSec=3
+
+# Security settings
+NoNewPrivileges=true
+PrivateTmp=true
+
+# Logging
+StandardOutput=append:/home/raguser/ragbackend/logs/backend.log
+StandardError=append:/home/raguser/ragbackend/logs/backend_error.log
+
+[Install]
+WantedBy=multi-user.target

@@ -1386,7 +1386,18 @@ textarea::placeholder{
   }
 
   // ==================== CONFIGURATION ====================
-  const API_BASE = 'https://docsyai-using-rag-model.onrender.com';
+  // Auto-detect local vs production environment
+  const isLocalhost = window.location.hostname === 'localhost' || 
+                     window.location.hostname === '127.0.0.1' || 
+                     window.location.hostname === '';
+  
+  const API_BASE = isLocalhost 
+    ? 'http://localhost:8001'  // Local development (port 8001)
+    : 'https://docsyai-using-rag-model.onrender.com';  // Production
+  
+  console.log('🌐 Running in:', isLocalhost ? 'LOCAL MODE' : 'PRODUCTION MODE');
+  console.log('📡 API Base:', API_BASE);
+  
   let isProcessing = false;
   let currentSessionId = null;
 
