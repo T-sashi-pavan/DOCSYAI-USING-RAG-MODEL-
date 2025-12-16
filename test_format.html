@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Test Chatbot Formatting</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+    .message { max-width: 600px; margin: 20px auto; padding: 20px; background: white; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    .message p { margin: 0 0 12px 0; line-height: 1.8; }
+    .message p:last-child { margin-bottom: 0; }
+    .message strong { font-weight: 700; color: #1f2937; }
+    .message br { display: block; content: ""; margin-top: 8px; }
+    .message em { font-style: italic; color: #6b7280; }
+    h3 { text-align: center; color: #333; }
+  </style>
+</head>
+<body>
+  <h3>✅ Chatbot Response Preview (Clean Format)</h3>
+  
+  <div class="message">
+    <h4>Response 1: Simple Answer</h4>
+    <div id="test1"></div>
+  </div>
+  
+  <div class="message">
+    <h4>Response 2: With Bold Text</h4>
+    <div id="test2"></div>
+  </div>
+  
+  <div class="message">
+    <h4>Response 3: Multiple Paragraphs</h4>
+    <div id="test3"></div>
+  </div>
+
+  <script>
+    function formatBotResponse(rawText, isFromPDF) {
+      // Check if it's an error or simple notification message
+      if (rawText.startsWith('❌') || rawText.startsWith('✅')) {
+        return rawText;
+      }
+
+      // Clean and format the response text
+      let cleanText = rawText
+        .replace(/\*\*Note:\*\*/gi, '<strong>Note:</strong>')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\n\n+/g, '</p><p>')
+        .replace(/\n/g, '<br>');
+      
+      // Wrap in paragraph tags
+      if (!cleanText.startsWith('<')) {
+        cleanText = '<p>' + cleanText + '</p>';
+      }
+      
+      // Add source indicator
+      let sourceText = '';
+      if (isFromPDF) {
+        sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+          <em>📄 Answer from your document</em>
+        </div>`;
+      } else {
+        sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+          <em>🤖 General knowledge (not from uploaded document)</em>
+        </div>`;
+      }
+      
+      return cleanText + sourceText;
+    }
+
+    // Test 1: Simple answer
+    const test1 = "Machine learning is a field of computer science that enables computers to learn from data.";
+    document.getElementById('test1').innerHTML = formatBotResponse(test1, false);
+
+    // Test 2: With bold
+    const test2 = "**Machine Learning** is a subset of artificial intelligence.\n\nIt allows computers to learn without being explicitly programmed.";
+    document.getElementById('test2').innerHTML = formatBotResponse(test2, true);
+
+    // Test 3: Multiple paragraphs
+    const test3 = "**Key Concepts:**\n\n1. Supervised Learning - Learning from labeled data\n\n2. Unsupervised Learning - Finding patterns in data\n\n3. Reinforcement Learning - Learning through rewards";
+    document.getElementById('test3').innerHTML = formatBotResponse(test3, true);
+  </script>
+</body>
+</html>
