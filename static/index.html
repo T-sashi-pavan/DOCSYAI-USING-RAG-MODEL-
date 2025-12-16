@@ -481,7 +481,7 @@ body{
 
 .message.bot .message-content p{
   margin:0 0 12px 0;
-  line-height:1.7;
+  line-height:1.8;
 }
 
 .message.bot .message-content p:last-child{
@@ -493,91 +493,15 @@ body{
   color:#1f2937;
 }
 
-.message.bot .message-content em{
-  font-style:italic;
-  color:#6b7280;
-}
-
-.message.bot .message-content .response-section{
-  margin-bottom:16px;
-}
-
-.message.bot .message-content .response-section:last-child{
-  margin-bottom:0;
-}
-
-.message.bot .message-content .section-title{
-  font-weight:700;
-  font-size:15px;
-  color:var(--primary);
-  margin-bottom:10px;
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
-
-.message.bot .message-content ul,
-.message.bot .message-content ol{
-  margin:0;
-  padding-left:24px;
-  list-style-position:outside;
-}
-
-.message.bot .message-content ul{
-  list-style-type:disc;
-}
-
-.message.bot .message-content li{
-  margin:8px 0;
-  line-height:1.7;
-  padding-left:4px;
-}
-
-.message.bot .message-content li strong{
-  color:var(--text-dark);
-}
-
-.message.bot .message-content .key-points{
-  background:rgba(14,164,122,0.06);
-  border-left:3px solid var(--primary);
-  padding:16px 18px;
-  border-radius:8px;
-  margin:16px 0;
-}
-
-.message.bot .message-content .key-points ul{
+.message.bot .message-content br{
+  display:block;
+  content:"";
   margin-top:8px;
 }
 
-.message.bot .message-content .tip-box{
-  background:linear-gradient(135deg,rgba(251,191,36,0.1),rgba(245,158,11,0.05));
-  border-left:3px solid #f59e0b;
-  padding:14px 18px;
-  border-radius:8px;
-  margin:14px 0;
-}
-
-.message.bot .message-content .example-box{
-  background:rgba(99,102,241,0.06);
-  border-left:3px solid #6366f1;
-  padding:16px 18px;
-  border-radius:8px;
-  margin:16px 0;
-}
-
-.message.bot .message-content .opening{
-  color:var(--primary);
-  font-weight:600;
-  margin-bottom:16px;
-  font-size:15px;
-}
-
-.message.bot .message-content .closing{
+.message.bot .message-content em{
+  font-style:italic;
   color:#6b7280;
-  font-size:13.5px;
-  margin-top:16px;
-  padding-top:14px;
-  border-top:1px solid #f3f4f6;
 }
 
 .message-avatar{
@@ -1613,166 +1537,35 @@ textarea::placeholder{
       return escapeHtml(rawText);
     }
 
-    let formattedHTML = '';
+    // Clean and format the response text
+    let cleanText = rawText
+      .replace(/\*\*Note:\*\*/gi, '<strong>Note:</strong>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\n\n+/g, '</p><p>')
+      .replace(/\n/g, '<br>');
     
-    // 1️⃣ OPENING SECTION
-    const openingEmoji = isFromPDF ? '📘' : '🤖';
-    const openingText = isFromPDF 
-      ? "Here's what I found in your document:"
-      : "Here's the information based on general knowledge:";
-    
-    formattedHTML += `<div class="opening">${openingEmoji} <strong>${openingText}</strong></div>`;
-
-    // 2️⃣ PARSE AND FORMAT THE MAIN CONTENT
-    const sections = parseResponse(rawText);
-    
-    // Render Answer Section
-    if (sections.answer) {
-      formattedHTML += `<div class="response-section">`;
-      formattedHTML += formatContent(sections.answer);
-      formattedHTML += `</div>`;
+    // Wrap in paragraph tags
+    if (!cleanText.startsWith('<')) {
+      cleanText = '<p>' + cleanText + '</p>';
     }
     
-    // Render Key Points Section
-    if (sections.keyPoints && sections.keyPoints.length > 0) {
-      formattedHTML += `
-        <div class="key-points">
-          <div class="section-title">🔑 Key Points</div>
-          <ul>
-            ${sections.keyPoints.map(point => `<li>${formatContent(point)}</li>`).join('')}
-          </ul>
-        </div>
-      `;
-    }
-    
-    // Render Example Section
-    if (sections.example) {
-      formattedHTML += `
-        <div class="example-box">
-          <div class="section-title">🧠 Example</div>
-          ${formatContent(sections.example)}
-        </div>
-      `;
-    }
-    
-    // Render Additional Context
-    if (sections.context) {
-      formattedHTML += `<div class="response-section">`;
-      formattedHTML += formatContent(sections.context);
-      formattedHTML += `</div>`;
-    }
-
-    // 3️⃣ SOURCE INDICATOR
+    // Add source indicator
+    let sourceText = '';
     if (isFromPDF) {
-      formattedHTML += `
-        <div class="response-section" style="font-size:13.5px;color:#6b7280;margin-top:-8px;">
-          <em>📄 This answer is based on your uploaded document.</em>
-        </div>
-      `;
+      sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+        <em>📄 Answer from your document</em>
+      </div>`;
     } else {
-      formattedHTML += `
-        <div class="response-section" style="font-size:13.5px;color:#6b7280;margin-top:-80px;">
-          <em>📚 This answer is based on general knowledge, not the uploaded document.</em>
-        </div>
-      `;
+      sourceText = `<div style="margin-top:12px;padding-top:12px;border-top:1px solid #f3f4f6;font-size:13px;color:#6b7280;">
+        <em>🤖 General knowledge (not from uploaded document)</em>
+      </div>`;
     }
-
-    // 4️⃣ HELPFUL CLOSING TIP
-    const tips = [
-      "💡 <strong>Tip:</strong> You can ask me to explain this with an example.",
-      "💡 <strong>Tip:</strong> Ask for more details about any specific part.",
-      "💡 <strong>Tip:</strong> Need a simpler explanation? Just ask!",
-      "💡 <strong>Tip:</strong> Feel free to ask follow-up questions for clarity."
-    ];
-    const randomTip = tips[Math.floor(Math.random() * tips.length)];
     
-    formattedHTML += `<div class="closing">${randomTip}</div>`;
-
-    return formattedHTML;
+    return cleanText + sourceText;
   }
 
-  function parseResponse(text) {
-    const sections = {
-      answer: '',
-      keyPoints: [],
-      example: '',
-      context: ''
-    };
-    
-    // Split by common section markers
-    const answerMatch = text.match(/\*\*Answer:\*\*\s*([\s\S]*?)(?=\*\*Key Points:\*\*|\*\*Example:\*\*|\*\*Additional Context:\*\*|$)/i);
-    const keyPointsMatch = text.match(/\*\*Key Points:\*\*\s*([\s\S]*?)(?=\*\*Example:\*\*|\*\*Additional Context:\*\*|$)/i);
-    const exampleMatch = text.match(/\*\*Example:\*\*\s*([\s\S]*?)(?=\*\*Additional Context:\*\*|$)/i);
-    const contextMatch = text.match(/\*\*Additional Context:\*\*\s*([\s\S]*?)$/i);
-    
-    if (answerMatch) {
-      sections.answer = answerMatch[1].trim();
-    } else {
-      // If no structured format, use the whole text as answer
-      sections.answer = text.trim();
-    }
-    
-    if (keyPointsMatch) {
-      const pointsText = keyPointsMatch[1].trim();
-      // Parse bullet points
-      sections.keyPoints = pointsText
-        .split(/\n/)
-        .map(line => line.replace(/^[\*\-]\s*/, '').trim())
-        .filter(line => line.length > 0);
-    }
-    
-    if (exampleMatch) {
-      sections.example = exampleMatch[1].trim();
-    }
-    
-    if (contextMatch) {
-      sections.context = contextMatch[1].trim();
-    }
-    
-    return sections;
-  }
-
-  function formatContent(text) {
-    if (!text) return '';
-    
-    // Convert **bold** markdown to HTML
-    let formatted = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-    
-    // Convert *italic* markdown to HTML
-    formatted = formatted.replace(/\*(.+?)\*/g, '<em>$1</em>');
-    
-    // Convert bullet points to proper format
-    const lines = formatted.split('\n');
-    let html = '';
-    let inList = false;
-    
-    for (let line of lines) {
-      line = line.trim();
-      if (!line) continue;
-      
-      if (line.startsWith('* ') || line.startsWith('- ')) {
-        if (!inList) {
-          html += '<ul>';
-          inList = true;
-        }
-        html += `<li>${line.substring(2)}</li>`;
-      } else {
-        if (inList) {
-          html += '</ul>';
-          inList = false;
-        }
-        html += `<p>${line}</p>`;
-      }
-    }
-    
-    if (inList) {
-      html += '</ul>';
-    }
-    
-    return html;
-  }
-
-  function addLoadingMessage() {
+  // ==================== STATS ====================
+  async function checkStats() {
     const chatMessages = document.getElementById('chatMessages');
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message bot';
