@@ -27,6 +27,8 @@ class EmbeddingManager:
                 input_type="search_document"
             )
             return response.embeddings[0]
+        except Exception as e:
+            raise Exception(f"Failed to generate embedding: {e}")
 
     def embed_batch(self, texts: List[str], batch_size: int = 96) -> List[List[float]]:
         """
