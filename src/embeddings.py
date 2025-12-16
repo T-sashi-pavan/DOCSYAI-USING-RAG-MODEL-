@@ -21,14 +21,10 @@ class EmbeddingManager:
                 "Make sure to select 'Read' access (free tier)"
             )
         
-        # Initialize HuggingFace InferenceClient (correct way for serverless)
-        self.client = InferenceClient(
-            token=self.api_token,
-            provider="hf-inference"  # Use HuggingFace's serverless inference
-        )
+        # Initialize HuggingFace InferenceClient (serverless inference)
+        self.client = InferenceClient(token=self.api_token)
         
         print(f"☁️ Using FREE HuggingFace Serverless API: {model_name}")
-        print(f"   Using InferenceClient with provider: hf-inference")
 
     def embed_text(self, text: str, max_retries: int = 3) -> List[float]:
         """Convert single text to embedding with retry logic."""
