@@ -1,23 +1,23 @@
-# 📄 PDF Q&A RAG Backend
+# DocsyAI - RAG Document Intelligence
 
-A powerful **Retrieval-Augmented Generation (RAG)** backend API that enables intelligent question-answering over PDF documents. Built with FastAPI and optimized for low-memory cloud deployments (500MB).
+A production-ready **Retrieval-Augmented Generation (RAG)** system for intelligent document question-answering. Upload PDFs and get instant, accurate answers powered by AI.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 ![FastAPI](https://img.shields.io/badge/FastAPI-0.104-green?logo=fastapi)
 ![Groq](https://img.shields.io/badge/LLM-Groq-orange)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![Deployed](https://img.shields.io/badge/Status-Live-success)
 
 ---
 
-## ✨ Features
+## Features
 
-- 🚀 **Fast PDF Processing** - Upload and process PDFs with streaming for memory efficiency
-- 🤖 **Intelligent Q&A** - Ask questions and get accurate answers based on PDF content
-- 🔄 **Streaming Responses** - Real-time streaming answers for better UX
-- 💾 **Vector Storage** - Supabase-powered vector store for efficient semantic search
-- 🧠 **Smart Fallback** - Falls back to general knowledge when PDF doesn't contain relevant info
-- 📊 **Health Monitoring** - Built-in health checks and statistics endpoints
-- 🐳 **Docker Ready** - Optimized Dockerfile for cloud deployment
+- **Fast PDF Processing** - Streaming upload and processing optimized for 512MB memory environments
+- **Intelligent Q&A** - Context-aware answers from your documents using advanced RAG techniques
+- **Real-time Responses** - Streaming LLM responses for better user experience
+- **Vector Search** - Supabase pgvector for efficient semantic similarity search
+- **Smart Fallback** - Answers general questions when content not found in documents
+- **Production Ready** - Currently deployed and serving 2,600+ document chunks
+- **Session Management** - Persistent chat history with localStorage
 
 ---
 
@@ -43,12 +43,12 @@ A powerful **Retrieval-Augmented Generation (RAG)** backend API that enables int
 
 ---
 
-## 📋 Prerequisites
+## Prerequisites
 
 - Python 3.11+
-- [Groq API Key](https://console.groq.com/) - For LLM inference
-- [HuggingFace API Key](https://huggingface.co/settings/tokens) - For embeddings
-- [Supabase Account](https://supabase.com/) - For vector storage
+- [Groq API Key](https://console.groq.com/) - LLM inference (llama-3.1-8b-instant)
+- [Cohere API Key](https://cohere.com/) - Text embeddings (embed-english-light-v3.0)
+- [Supabase Account](https://supabase.com/) - pgvector database
 
 ---
 
@@ -57,7 +57,7 @@ A powerful **Retrieval-Augmented Generation (RAG)** backend API that enables int
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/adityacodeverse-stack/ragbackend.git
+git clone https://github.com/T-sashi-pavan/DOCSYAI-USING-RAG-MODEL-.git
 cd ragbackend
 ```
 
@@ -82,11 +82,14 @@ pip install -r requirements.txt
 Create a `.env` file in the root directory:
 
 ```env
+# Python Version
+PYTHON_VERSION=3.11.0
+
 # LLM Provider
-GROQ_API_KEY=gsk_your_groq_api_key_here
+GROQ_API_KEY=your_groq_api_key_here
 
 # Embeddings
-HUGGINGFACE_API_KEY=hf_your_huggingface_token_here
+COHERE_API_KEY=your_cohere_api_key_here
 
 # Vector Store
 SUPABASE_URL=https://your-project.supabase.co
@@ -99,11 +102,17 @@ SUPABASE_ANON_KEY=your_supabase_anon_key_here
 python main.py
 ```
 
-The API will be available at `http://localhost:10000`
+The API will be available at `http://localhost:8001`
+
+### 5. Access the Frontend
+
+Open `static/index.html` in your browser or access it at:
+- **Production**: https://docsyai-using-rag-model.onrender.com
+- **Local**: http://localhost:8001
 
 ---
 
-## 📡 API Endpoints
+## API Endpoints
 
 ### Health & Status
 
@@ -129,12 +138,12 @@ The API will be available at `http://localhost:10000`
 
 ---
 
-## 📝 Usage Examples
+## Usage Examples
 
 ### Upload a PDF
 
 ```bash
-curl -X POST "http://localhost:10000/upload" \
+curl -X POST "http://localhost:8001/upload" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@document.pdf"
 ```
@@ -151,7 +160,7 @@ curl -X POST "http://localhost:10000/upload" \
 ### Ask a Question
 
 ```bash
-curl -X POST "http://localhost:10000/ask" \
+curl -X POST "http://localhost:8001/ask" \
   -H "Content-Type: application/json" \
   -d '{
     "question": "What is the main topic of the document?",
@@ -178,97 +187,68 @@ curl -X POST "http://localhost:10000/ask" \
 ### Streaming Response
 
 ```bash
-curl -X POST "http://localhost:10000/ask-stream" \
+curl -X POST "http://localhost:8001/ask-stream" \
   -H "Content-Type: application/json" \
   -d '{"question": "Summarize the key points"}'
 ```
 
 ---
 
-## 🐳 Docker Deployment
+## Deployment
 
-### Build the Image
-
-```bash
-docker build -t pdf-qa-backend .
-```
-
-### Run the Container
-
-```bash
-docker run -d \
-  -p 10000:10000 \
-  -e GROQ_API_KEY=your_key \
-  -e HUGGINGFACE_API_KEY=your_key \
-  -e SUPABASE_URL=your_url \
-  -e SUPABASE_ANON_KEY=your_key \
-  pdf-qa-backend
-```
-
----
-
-## ☁️ Cloud Deployment
-
-### Render.com
-
-This project includes a `render.yaml` for easy deployment on Render:
+### Render.com (Production)
 
 1. Connect your GitHub repository to Render
-2. Set environment variables in Render dashboard
-3. Deploy!
+2. Create a new Web Service
+3. Set environment variables:
+   - `PYTHON_VERSION=3.11.0`
+   - `GROQ_API_KEY`
+   - `COHERE_API_KEY`
+   - `SUPABASE_URL`
+   - `SUPABASE_ANON_KEY`
+4. Deploy automatically on push
 
-### Environment Variables Required
-
-| Variable | Description |
-|----------|-------------|
-| `GROQ_API_KEY` | Groq API key for LLM inference |
-| `HUGGINGFACE_API_KEY` | HuggingFace token for embeddings |
-| `SUPABASE_URL` | Supabase project URL |
-| `SUPABASE_ANON_KEY` | Supabase anonymous key |
+Current production deployment: https://docsyai-using-rag-model.onrender.com
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 ragbackend/
-├── main.py                 # FastAPI application entry point
-├── config.py               # Configuration settings
-├── requirements.txt        # Python dependencies
-├── Dockerfile              # Docker configuration
-├── render.yaml             # Render.com deployment config
-├── deploy.sh               # Deployment helper script
-├── src/
-│   ├── __init__.py
-│   ├── rag_system.py       # Main RAG orchestrator
-│   ├── pdf_loader.py       # PDF text extraction
-│   ├── text_chunker.py     # Text splitting logic
-│   ├── vector_store.py     # Supabase vector storage
-│   ├── embeddings.py       # HuggingFace embeddings
-│   ├── llm_manager.py      # Groq LLM integration
-│   ├── cache_manager.py    # Caching utilities
-│   └── memory_monitor.py   # Memory monitoring
-├── test_basic.py           # Basic tests
-├── test_groq_models.py     # Groq model tests
-├── test_hf_token.py        # HuggingFace token tests
-└── verify_setup.py         # Setup verification script
+├── main.py                 # FastAPI server
+├── config.py               # Configuration
+├── requirements.txt        # Dependencies
+├── render.yaml             # Render deployment
+├── static/
+│   └── index.html          # Frontend UI
+└── src/
+    ├── rag_system.py       # RAG orchestrator
+    ├── pdf_loader.py       # PDF processing
+    ├── text_chunker.py     # Text splitting
+    ├── vector_store.py     # Supabase storage
+    ├── embeddings.py       # Cohere embeddings
+    ├── llm_manager.py      # Groq LLM
+    ├── cache_manager.py    # Caching
+    └── memory_monitor.py   # Memory tracking
 ```
 
 ---
 
-## ⚡ Performance Optimizations
+## Performance
 
-This backend is optimized for **500MB memory environments**:
+Optimized for **512MB memory environments** (Render free tier):
 
-- **Streaming PDF Processing** - Pages processed one at a time
-- **Batch Chunk Processing** - Chunks added in small batches with garbage collection
-- **Async Operations** - Non-blocking I/O for better concurrency
-- **Background Processing** - PDF ingestion runs in background tasks
-- **Efficient Embeddings** - API-based embeddings (no local models)
+- Memory usage: ~71MB baseline (86% under limit)
+- Streaming PDF processing with garbage collection
+- API-based embeddings (no heavy local models)
+- Async FastAPI for concurrent requests
+- Background task processing
+- Currently serving 2,600+ document chunks
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 Key configuration options in `config.py`:
 
@@ -281,53 +261,17 @@ Key configuration options in `config.py`:
 
 ---
 
-## 🧪 Testing
+## Technology Stack
 
-Run the verification scripts:
-
-```bash
-# Verify setup
-python verify_setup.py
-
-# Test basic functionality
-python test_basic.py
-
-# Test Groq models
-python test_groq_models.py
-
-# Test HuggingFace token
-python test_hf_token.py
-```
+- **Backend**: FastAPI, Python 3.11
+- **LLM**: Groq (llama-3.1-8b-instant)
+- **Embeddings**: Cohere (embed-english-light-v3.0, 384 dimensions)
+- **Database**: Supabase pgvector
+- **Frontend**: Vanilla JavaScript, HTML5, CSS3
+- **Deployment**: Render.com
 
 ---
 
-## 🤝 Contributing
+## License
 
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-## 🙏 Acknowledgments
-
-- [FastAPI](https://fastapi.tiangolo.com/) - Modern Python web framework
-- [Groq](https://groq.com/) - Ultra-fast LLM inference
-- [HuggingFace](https://huggingface.co/) - AI models and embeddings
-- [Supabase](https://supabase.com/) - Open source Firebase alternative
-
----
-
-<p align="center">
-  Made with ❤️ by <a href="https://github.com/adityacodeverse-stack">Aditya</a>
-</p>
+MIT License - feel free to use this project for your own purposes.
