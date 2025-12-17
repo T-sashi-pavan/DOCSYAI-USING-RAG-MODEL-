@@ -162,8 +162,8 @@ INFO:     Application startup complete
 
 ### Step 7: Open in Browser
 
-1. Open your web browser
-2. Go to: `http://localhost:8001`
+1. **Local**: Go to `http://localhost:8001` in your browser
+2. **Live Demo**: Visit https://docsyai-using-rag-model.pages.dev
 3. You'll see the DocsyAI interface!
 
 ### Step 8: Try It Out!
@@ -595,7 +595,7 @@ MIT License - feel free to use this project for your own purposes.
 
 ## 🌟 Project Status
 
-- ✅ **Currently Deployed**: https://docsyai-using-rag-model.onrender.com
+- ✅ **Currently Deployed**: https://docsyai-using-rag-model.pages.dev
 - ✅ **Production Ready**: Serving 2,600+ document chunks
 - ✅ **Actively Maintained**: Regular updates and improvements
 - ✅ **Mobile Responsive**: Works on all devices
@@ -625,6 +625,6 @@ Built with amazing free tools and APIs:
 
 Made with ❤️ for the open-source community
 
-[Live Demo](https://docsyai-using-rag-model.onrender.com) | [Report Bug](https://github.com/T-sashi-pavan/DOCSYAI-USING-RAG-MODEL-/issues) | [Request Feature](https://github.com/T-sashi-pavan/DOCSYAI-USING-RAG-MODEL-/issues)
+[Live Demo](https://docsyai-using-rag-model.pages.dev) | [Report Bug](https://github.com/T-sashi-pavan/DOCSYAI-USING-RAG-MODEL-/issues) | [Request Feature](https://github.com/T-sashi-pavan/DOCSYAI-USING-RAG-MODEL-/issues)
 
 </div>
