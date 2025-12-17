@@ -284,50 +284,8 @@ curl -X POST "http://localhost:8001/ask" \
 
 ## 🚀 Deployment Guide
 
-### Option 1: Deploy to Render (Recommended for Beginners)
 
-**Why Render?** Free tier, automatic deployments, easy setup!
-
-#### Step-by-Step:
-
-1. **Create Render Account**
-   - Go to [https://render.com](https://render.com)
-   - Sign up with GitHub (easier!)
-
-2. **Connect Your Repository**
-   - Click "New" → "Web Service"
-   - Connect your GitHub
-   - Select this repository
-
-3. **Configure Service**
-   - **Name**: `docsyai-chatbot` (or your choice)
-   - **Environment**: `Python 3`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `python main.py`
-
-4. **Add Environment Variables**
-   - Click "Environment" tab
-   - Add these variables (from your `.env` file):
-     ```
-     PYTHON_VERSION = 3.11.0
-     GROQ_API_KEY = your_groq_key
-     COHERE_API_KEY = your_cohere_key
-     SUPABASE_URL = your_supabase_url
-     SUPABASE_ANON_KEY = your_supabase_key
-     ```
-
-5. **Deploy!**
-   - Click "Create Web Service"
-   - Wait 5-10 minutes for first deployment
-   - You'll get a URL like: `https://your-app.onrender.com`
-
-6. **Test It**
-   - Visit your URL
-   - Upload a PDF and ask questions!
-
-**🎉 You're live!** Every time you push to GitHub, Render auto-deploys!
-
-### Option 2: Deploy to Google Cloud Platform
+### Deploy to Google Cloud Platform
 
 For advanced users who want more control:
 
