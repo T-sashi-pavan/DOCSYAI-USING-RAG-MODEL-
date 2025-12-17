@@ -11,7 +11,10 @@
 
 ## 📊 System Architecture
 
-![DocsyAI Workflow](Gemini_Generated_Image_cx5kz7cx5kz7cx5k.png)
+<div align="center">
+  <img src="./Gemini_Generated_Image_cx5kz7cx5kz7cx5k.png" alt="DocsyAI RAG System Workflow Diagram" width="800"/>
+  <p><em>Complete RAG workflow from PDF upload to intelligent answer generation</em></p>
+</div>
 
 **How It Works:**
 
